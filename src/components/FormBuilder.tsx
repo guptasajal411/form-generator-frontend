@@ -107,7 +107,7 @@ const FormBuilder: React.FC<{ isEditMode?: boolean; existingForm?: Form }> = ({
                             {fields.map((field, index) => (
                                 <FieldComponent
                                     key={field.id}
-                                    field={field}
+                                    field={field} setFocusedInputIndex={setFocusedInputIndex}
                                     index={index} setError={setError}
                                     fields={fields} setFields={setFields}
                                     moveField={moveField}
@@ -149,7 +149,8 @@ const FieldComponent: React.FC<{
     fields: Field[];
     setFields: React.Dispatch<React.SetStateAction<Field[]>>;
     setError: React.Dispatch<React.SetStateAction<string>>;
-}> = ({ field, index, moveField, fields, setFields, setError }) => {
+    setFocusedInputIndex: React.Dispatch<React.SetStateAction<number>>;
+}> = ({ field, index, moveField, fields, setFields, setError, setFocusedInputIndex }) => {
     const [, drag] = useDrag({
         type: "field",
         item: { index },
@@ -172,7 +173,7 @@ const FieldComponent: React.FC<{
         >
             <img src="/drag.png" alt="drag" className="cursor-grab" />
             <input type={field.type} placeholder={field.title} className="w-full border px-2 py-1 focus:outline-none" />
-            <button className="w-4">
+            <button className="w-4" onClick={() => setFocusedInputIndex(index)}>
                 <img src="/pencil.png" alt="edit" />
             </button>
             <button
