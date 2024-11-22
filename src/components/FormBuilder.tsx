@@ -108,7 +108,8 @@ const FormBuilder: React.FC<{ isEditMode?: boolean; existingForm?: Form }> = ({
                                 <FieldComponent
                                     key={field.id}
                                     field={field}
-                                    index={index}
+                                    index={index} setError={setError}
+                                    fields={fields} setFields={setFields}
                                     moveField={moveField}
                                 />
                             ))}
@@ -141,7 +142,14 @@ const FormBuilder: React.FC<{ isEditMode?: boolean; existingForm?: Form }> = ({
     );
 };
 
-const FieldComponent: React.FC<{ field: Field; index: number; moveField: (fromIndex: number, toIndex: number) => void }> = ({ field, index, moveField }) => {
+const FieldComponent: React.FC<{
+    field: Field;
+    index: number;
+    moveField: (fromIndex: number, toIndex: number) => void;
+    fields: Field[];
+    setFields: React.Dispatch<React.SetStateAction<Field[]>>;
+    setError: React.Dispatch<React.SetStateAction<string>>;
+}> = ({ field, index, moveField, fields, setFields, setError }) => {
     const [, drag] = useDrag({
         type: "field",
         item: { index },
@@ -167,8 +175,22 @@ const FieldComponent: React.FC<{ field: Field; index: number; moveField: (fromIn
             <button className="w-4">
                 <img src="/pencil.png" alt="edit" />
             </button>
+            <button
+                className="w-4"
+                onClick={() => {
+                    try {
+                        const updatedFields = fields.filter((_, idx) => idx !== index);
+                        setFields(updatedFields);
+                    } catch (e) {
+                        setError("Failed to delete field");
+                    }
+                }}
+            >
+                <img src="/trash.png" alt="delete" />
+            </button>
         </div>
     );
 };
+
 
 export default FormBuilder;
