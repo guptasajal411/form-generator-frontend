@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { deleteForm, fetchForms } from "../api";
 import { Form } from "../types";
+import "./styles/Home.css"; // Importing the normal CSS file
 
 const Home: React.FC = () => {
     const [forms, setForms] = useState<Form[]>([]);
@@ -39,28 +40,49 @@ const Home: React.FC = () => {
     };
 
     return (
-        <div>
-            <h1>Welcome to Form.com</h1>
-            <button onClick={() => navigate("/form/create")}>Create Form</button>
-            <h1>Forms</h1>
+        <div className="container">
+            <h1 className="title">Welcome to Form.com</h1>
+            <p className="subtitle">This is a simple form builder</p>
+            <button className="createButton" onClick={() => navigate("/form/create")}>
+                Create New Form
+            </button>
+            <hr />
+            <h2 className="formsHeading">Forms</h2>
 
             {loading ? (
-                <div>Loading...</div>
+                <div className="loading">Loading...</div>
             ) : (
-                <ul>
+                <div className="formsContainer">
                     {forms.length > 0 ? (
                         forms.map((form) => (
-                            <li key={form._id}>
-                                <h3>{form.title}</h3>
-                                <button onClick={() => navigate(`/form/${form._id}`)}>View</button>
-                                <button onClick={() => navigate(`/form/${form._id}/edit`)}>Edit</button>
-                                <button onClick={() => handleDelete(form._id as string)}>Delete</button>
-                            </li>
+                            <div key={form._id} className="formBox">
+                                <h2 className="formTitle">{form.title}</h2>
+                                <div className="buttons">
+                                    <button
+                                        className="button viewButton"
+                                        onClick={() => navigate(`/form/${form._id}`)}
+                                    >
+                                        View
+                                    </button>
+                                    <button
+                                        className="button editButton"
+                                        onClick={() => navigate(`/form/${form._id}/edit`)}
+                                    >
+                                        Edit
+                                    </button>
+                                    <button
+                                        className="button deleteButton"
+                                        onClick={() => handleDelete(form._id as string)}
+                                    >
+                                        Delete
+                                    </button>
+                                </div>
+                            </div>
                         ))
                     ) : (
                         <p>You have no forms created yet</p>
                     )}
-                </ul>
+                </div>
             )}
         </div>
     );

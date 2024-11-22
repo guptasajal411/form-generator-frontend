@@ -2,6 +2,7 @@ export interface Field {
     id: string;
     type: "email" | "text" | "password" | "number" | "date";
     title: string;
+    placeholder: string;
     order: number;
 }
 
