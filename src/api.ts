@@ -1,6 +1,6 @@
 import { Form } from "./types";
 
-const API_BASE_URL = "http://localhost:5000/forms";
+const API_BASE_URL = process.env.REACT_APP_API_URL as string;
 
 export const fetchForms = async (): Promise<Form[]> => {
     const response = await fetch(API_BASE_URL);
@@ -15,7 +15,7 @@ export const fetchFormById = async (id: string): Promise<Form> => {
     return await response.json();
 };
 
-export const createForm = async (data: Partial<Form>): Promise<Form> => {
+export const createForm = async (data: Form): Promise<Form> => {
     const response = await fetch(API_BASE_URL, {
         method: "POST",
         headers: {
@@ -29,7 +29,7 @@ export const createForm = async (data: Partial<Form>): Promise<Form> => {
 
 export const updateForm = async (
     id: string,
-    data: Partial<Form>
+    data: Form
 ): Promise<Form> => {
     const response = await fetch(`${API_BASE_URL}/${id}`, {
         method: "PUT",
