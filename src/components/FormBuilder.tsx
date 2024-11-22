@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { createForm, fetchFormById, updateForm } from "../api";
 import { Field, Form } from "../types";
+import { useDrag, useDrop } from "react-dnd";
 
 const FormBuilder: React.FC<{ isEditMode?: boolean; existingForm?: Form }> = ({
     isEditMode = false,
@@ -38,16 +39,21 @@ const FormBuilder: React.FC<{ isEditMode?: boolean; existingForm?: Form }> = ({
             if (!formTitle.trim()) throw new Error("Form title cannot be empty");
             if (!fields.length) throw new Error("Form must have at least one field");
             if (isEditMode) {
-                console.log("test")
                 await updateForm(id as string, formData);
             } else {
-                console.log(formData)
                 await createForm(formData);
             }
             navigate("/");
         } catch (e) {
             setError(e instanceof Error ? e.message : "Failed to save form");
         }
+    };
+
+    const moveField = (fromIndex: number, toIndex: number) => {
+        const updatedFields = [...fields];
+        const [movedField] = updatedFields.splice(fromIndex, 1);
+        updatedFields.splice(toIndex, 0, movedField);
+        setFields(updatedFields);
     };
 
     useEffect(() => {
@@ -99,22 +105,12 @@ const FormBuilder: React.FC<{ isEditMode?: boolean; existingForm?: Form }> = ({
                         )}
                         <div className="flex flex-row flex-wrap items-center justify-between w-full">
                             {fields.map((field, index) => (
-                                <div className="flex flex-row items-center justify-start w-1/2 p-2 gap-2" key={field.id}>
-                                    <input type={field.type} placeholder={field.title} className="w-full border px-2 py-1 focus:outline-none" />
-                                    <button className="w-4" onClick={() => setFocusedInputIndex(index)}>
-                                        <img src="/pencil.png" alt="edit" />
-                                    </button>
-                                    <button className="w-4" onClick={() => {
-                                        try {
-                                            const updatedFields = fields.filter((_, idx) => idx !== index);
-                                            setFields(updatedFields);
-                                        } catch (e) {
-                                            setError("Failed to delete field");
-                                        }
-                                    }}>
-                                        <img src="/trash.png" alt="delete" />
-                                    </button>
-                                </div>
+                                <FieldComponent
+                                    key={field.id}
+                                    field={field}
+                                    index={index}
+                                    moveField={moveField}
+                                />
                             ))}
                         </div>
                         <button className="px-3 py-1 bg-green-700 text-white rounded-md mt-6" onClick={saveForm}>
@@ -141,6 +137,36 @@ const FormBuilder: React.FC<{ isEditMode?: boolean; existingForm?: Form }> = ({
                     )}
                 </div>
             </div>
+        </div>
+    );
+};
+
+const FieldComponent: React.FC<{ field: Field; index: number; moveField: (fromIndex: number, toIndex: number) => void }> = ({ field, index, moveField }) => {
+    const [, drag] = useDrag({
+        type: "field",
+        item: { index },
+    });
+
+    const [, drop] = useDrop({
+        accept: "field",
+        hover: (item: { index: number }) => {
+            if (item.index !== index) {
+                moveField(item.index, index);
+                item.index = index;
+            }
+        },
+    });
+
+    return (
+        <div
+            ref={(node) => drag(drop(node))}
+            className="flex flex-row items-center justify-start w-1/2 p-2 gap-2"
+        >
+            <img src="/drag.png" alt="drag" className="cursor-grab" />
+            <input type={field.type} placeholder={field.title} className="w-full border px-2 py-1 focus:outline-none" />
+            <button className="w-4">
+                <img src="/pencil.png" alt="edit" />
+            </button>
         </div>
     );
 };
